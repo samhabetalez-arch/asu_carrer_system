@@ -116,8 +116,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: _passwordDecoration(),
                               validator: (value) =>
                                   (value == null || value.isEmpty)
-                                      ? (isArabic ? "مطلوب" : "Required")
-                                      : null,
+                                  ? (isArabic ? "مطلوب" : "Required")
+                                  : null,
                             ),
                             Align(
                               alignment: isArabic

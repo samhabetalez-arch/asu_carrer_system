@@ -27,6 +27,14 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
   List<String> skills = [];
   final TextEditingController _skillController = TextEditingController();
+  final ScrollController _skillsScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _skillController.dispose();
+    _skillsScrollController.dispose();
+    super.dispose();
+  }
 
   bool get hasUnsavedChanges =>
       studyStatus != null ||
@@ -569,94 +577,129 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
           child: Row(
             children: [
               if (skills.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.7,
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: skills
-                            .map(
-                              (s) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 2.0,
-                                ),
-                                child: Chip(
-                                  label: Text(
-                                    s,
-                                    style: const TextStyle(fontSize: 11),
-                                  ),
-                                  onDeleted: () =>
-                                      setState(() => skills.remove(s)),
-                                  visualDensity: VisualDensity.compact,
-                                  deleteIcon: const Icon(
-                                    Icons.close,
-                                    size: 14,
-                                    color: Colors.red,
-                                  ),
-                                  backgroundColor: const Color(0xFFF0F7FF),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    side: BorderSide(
-                                      // ignore: deprecated_member_use
-                                      color: primaryBlue.withOpacity(0.1),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    Icons.chevron_right,
+                    // ignore: deprecated_member_use
+                    color: primaryBlue.withOpacity(0.5),
+                    size: 20,
                   ),
+                  onPressed: () {
+                    _skillsScrollController.animateTo(
+                      _skillsScrollController.offset - 100,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
                 ),
               Expanded(
-                child: TextFormField(
-                  controller: _skillController,
-                  style: const TextStyle(fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: skills.isEmpty
-                        ? (isArabic ? "أضف مهارة..." : "Add skill...")
-                        : "",
-                    hintStyle: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black26,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 12,
-                    ),
+                child: SingleChildScrollView(
+                  controller: _skillsScrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      // Chips for skills
+                      ...skills.map(
+                        (s) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          child: Chip(
+                            label: Text(
+                              s,
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                            onDeleted: () => setState(() => skills.remove(s)),
+                            visualDensity: VisualDensity.compact,
+                            deleteIcon: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.red,
+                            ),
+                            backgroundColor: const Color(0xFFF0F7FF),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(
+                                // ignore: deprecated_member_use
+                                color: primaryBlue.withOpacity(0.1),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // The text field for adding new skills
+                      SizedBox(
+                        width:
+                            120, // Fixed width for the input part within the scroll
+                        child: TextFormField(
+                          controller: _skillController,
+                          style: const TextStyle(fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: skills.isEmpty
+                                ? (isArabic ? "أضف مهارة..." : "Add skill...")
+                                : (isArabic ? "أخرى..." : "More..."),
+                            hintStyle: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black26,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 12,
+                            ),
+                          ),
+                          onChanged: (val) {
+                            if (val.endsWith(',') || val.endsWith('،')) {
+                              final newSkill = val
+                                  .substring(0, val.length - 1)
+                                  .trim();
+                              if (newSkill.isNotEmpty) {
+                                setState(() {
+                                  skills.add(newSkill);
+                                  _skillController.clear();
+                                });
+                              } else {
+                                _skillController.clear();
+                              }
+                            }
+                          },
+                          onFieldSubmitted: (v) {
+                            if (v.trim().isNotEmpty) {
+                              setState(() {
+                                skills.add(v.trim());
+                                _skillController.clear();
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  onChanged: (val) {
-                    if (val.endsWith(',') || val.endsWith('،')) {
-                      final newSkill = val.substring(0, val.length - 1).trim();
-                      if (newSkill.isNotEmpty) {
-                        setState(() {
-                          skills.add(newSkill);
-                          _skillController.clear();
-                        });
-                      } else {
-                        _skillController.clear();
-                      }
-                    }
-                  },
-                  onFieldSubmitted: (v) {
-                    if (v.trim().isNotEmpty) {
-                      setState(() {
-                        skills.add(v.trim());
-                        _skillController.clear();
-                      });
-                    }
-                  },
                 ),
               ),
+              if (skills.isNotEmpty)
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    Icons.chevron_left,
+                    // ignore: deprecated_member_use
+                    color: primaryBlue.withOpacity(0.5),
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    _skillsScrollController.animateTo(
+                      _skillsScrollController.offset + 100,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
               IconButton(
                 padding: EdgeInsets.zero,
-                icon: Icon(Icons.add_circle, color: primaryBlue, size: 22),
+                icon: Icon(Icons.add_circle, color: primaryBlue, size: 24),
                 onPressed: () {
                   final val = _skillController.text.trim();
                   if (val.isNotEmpty) {
@@ -725,8 +768,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       onPressed: isLoading
           ? null
           : () async {
-              if (selectedFaculty != null &&
-                  selectedYear != null) {
+              if (selectedFaculty != null && selectedYear != null) {
                 setState(() {
                   isLoading = true;
                 });

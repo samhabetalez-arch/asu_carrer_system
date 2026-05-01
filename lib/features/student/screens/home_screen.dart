@@ -102,7 +102,58 @@ class _HomeScreenState extends State<HomeScreen> {
     'profileTipDesc': isArabic
         ? "أكمل مهاراتك لتتميز."
         : "Complete your skills to stand out.",
+    'logoutConfirmTitle': isArabic ? "تأكيد الخروج" : "Confirm Logout",
+    'logoutConfirmMsg': isArabic
+        ? "هل أنت متأكد أنك تريد المغادرة أو تسجيل الخروج؟"
+        : "Are you sure you want to leave or logout?",
+    'stay': isArabic ? "استمرار" : "Stay",
+    'logoutBtn': isArabic ? "خروج" : "Logout",
   };
+
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          texts['logoutConfirmTitle']!,
+          style: TextStyle(
+            color: primaryBlueLight,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(texts['logoutConfirmMsg']!),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              texts['stay']!,
+              style: TextStyle(
+                color: primaryBlueLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            },
+            child: Text(
+              texts['logoutBtn']!,
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,14 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               // Logout button
               TextButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  );
-                },
+                onPressed: _handleLogout,
                 icon: Icon(Icons.logout, color: grayText, size: 18),
                 label: Text(
                   texts['logout']!,
