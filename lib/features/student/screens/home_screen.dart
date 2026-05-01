@@ -267,9 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Image.asset(
                   'assets/image/logo image.jpg',
                   fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) =>
-                          const Icon(Icons.person, color: Colors.grey),
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.person, color: Colors.grey),
                 ),
               ),
               const SizedBox(width: 8),
